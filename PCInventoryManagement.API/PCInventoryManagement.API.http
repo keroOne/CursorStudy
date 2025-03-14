@@ -1,0 +1,6 @@
+@PCInventoryManagement.API_HostAddress = http://localhost:5190
+
+GET {{PCInventoryManagement.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
