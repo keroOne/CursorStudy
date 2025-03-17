@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "OSType",
+  "description": "OSの種類を表すスキーマ",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "integer",
+      "description": "OSTypeの一意識別子"
+    },
+    "name": {
+      "type": "string",
+      "description": "OS名",
+      "maxLength": 50
+    },
+    "isDeleted": {
+      "type": "boolean",
+      "description": "削除フラグ",
+      "default": false
+    },
+    "pcs": {
+      "type": "array",
+      "description": "このOSを使用しているPC一覧",
+      "items": {
+        "$ref": "pc.schema.json"
+      }
+    }
+  },
+  "required": ["name"]
+} 
