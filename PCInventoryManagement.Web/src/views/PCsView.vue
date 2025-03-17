@@ -17,13 +17,20 @@
             :loading="loading"
             class="elevation-1"
           >
-            <template v-slot:item.actions="{ item }">
+            <template #default:item="{ item }">
               <v-icon
                 size="small"
                 class="me-2"
                 @click="openDialog(item)"
               >
                 mdi-pencil
+              </v-icon>
+              <v-icon
+                size="small"
+                class="me-2"
+                @click="openLocationHistoryDialog(item)"
+              >
+                mdi-map-marker-path
               </v-icon>
               <v-icon
                 size="small"
@@ -126,16 +133,119 @@
       v-model="errorDialog"
       :message="errorMessage"
     />
+
+    <!-- 設置場所履歴ダイアログ -->
+    <v-dialog v-model="locationHistoryDialog" max-width="700px">
+      <v-card>
+        <v-card-title>
+          <span class="text-h5">設置場所履歴</span>
+        </v-card-title>
+
+        <v-card-text>
+          <v-data-table
+            :headers="locationHistoryHeaders"
+            :items="locationHistories"
+            :loading="locationHistoryLoading"
+            class="elevation-1 mb-4"
+          >
+            <template #default:item="{ item }">
+              <v-icon
+                size="small"
+                class="me-2"
+                @click="editLocationHistory(item)"
+              >
+                mdi-pencil
+              </v-icon>
+              <v-icon
+                size="small"
+                @click="deleteLocationHistory(item)"
+              >
+                mdi-delete
+              </v-icon>
+            </template>
+          </v-data-table>
+
+          <v-btn color="primary" class="mt-4" @click="openLocationHistoryEditDialog()">
+            <v-icon start>mdi-plus</v-icon>
+            新規履歴追加
+          </v-btn>
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue-darken-1" variant="text" @click="locationHistoryDialog = false">
+            閉じる
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <!-- 設置場所履歴編集ダイアログ -->
+    <v-dialog v-model="locationHistoryEditDialog" max-width="500px">
+      <v-card>
+        <v-card-title>
+          <span class="text-h5">{{ locationHistoryFormTitle }}</span>
+        </v-card-title>
+
+        <v-card-text>
+          <v-form ref="locationHistoryForm" v-model="locationHistoryValid">
+            <v-container>
+              <v-row>
+                <v-col cols="12">
+                  <v-select
+                    v-model="editedLocationHistory.locationId"
+                    :items="locations"
+                    item-title="name"
+                    item-value="id"
+                    label="設置場所"
+                    :rules="[v => !!v || '設置場所は必須です']"
+                    required
+                  ></v-select>
+                </v-col>
+                <v-col cols="12">
+                  <v-text-field
+                    v-model="editedLocationHistory.startDate"
+                    label="開始日"
+                    type="date"
+                    :rules="[v => !!v || '開始日は必須です']"
+                    required
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12">
+                  <v-text-field
+                    v-model="editedLocationHistory.endDate"
+                    label="終了日"
+                    type="date"
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+            </v-container>
+          </v-form>
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue-darken-1" variant="text" @click="closeLocationHistoryEditDialog">
+            キャンセル
+          </v-btn>
+          <v-btn color="blue-darken-1" variant="text" @click="saveLocationHistory">
+            保存
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import type { PC, OSType, User } from '../types'
-import { pcApi, osTypeApi, userApi } from '../api'
-import ErrorSnackbar from '../components/ErrorSnackbar.vue'
-import { required, maxLength, minLength, managementNumber, modelName } from '../validation/rules'
+import { ref, computed, onMounted, type Ref } from 'vue'
+import { useRouter } from 'vue-router'
+import type { PC, OSType, User, Location, PCLocationHistory } from '@/types'
+import { pcApi, osTypeApi, userApi, locationApi, pcLocationHistoryApi } from '@/api'
+import ErrorSnackbar from '@/components/ErrorSnackbar.vue'
+import { required, maxLength, minLength, managementNumber, modelName } from '@/validation/rules'
 
+const router = useRouter()
 const loading = ref(false)
 const dialog = ref(false)
 const deleteDialog = ref(false)
@@ -154,16 +264,42 @@ const defaultItem = ref<Partial<PC>>({
   currentUserId: undefined
 })
 
+const locationHistoryDialog = ref(false)
+const locationHistoryEditDialog = ref(false)
+const locationHistoryLoading = ref(false)
+const locationHistoryValid = ref(false)
+const locationHistoryForm = ref()
+const locations = ref<Location[]>([])
+const locationHistories = ref<PCLocationHistory[]>([])
+const editedLocationHistory = ref<Partial<PCLocationHistory>>({})
+const defaultLocationHistory = ref<Partial<PCLocationHistory>>({
+  locationId: undefined,
+  startDate: new Date().toISOString().split('T')[0],
+  endDate: null
+})
+
 const headers = [
   { title: '管理番号', key: 'managementNumber' },
   { title: 'モデル名', key: 'modelName' },
   { title: 'OS種類', key: 'osType.name' },
   { title: '現在の使用者', key: 'currentUser.displayName' },
+  { title: '現在の設置場所', key: 'currentLocation.name' },
+  { title: '操作', key: 'actions', sortable: false }
+]
+
+const locationHistoryHeaders = [
+  { title: '設置場所', key: 'location.name' },
+  { title: '開始日', key: 'startDate' },
+  { title: '終了日', key: 'endDate' },
   { title: '操作', key: 'actions', sortable: false }
 ]
 
 const formTitle = computed(() => {
   return editedIndex.value === -1 ? '新規PC追加' : 'PC編集'
+})
+
+const locationHistoryFormTitle = computed(() => {
+  return editedLocationHistory.value.id ? '設置場所履歴の編集' : '新規設置場所履歴の追加'
 })
 
 function openDialog(item?: PC) {
@@ -202,7 +338,8 @@ async function save() {
       await fetchData()
     } else {
       // 新規作成処理
-      await pcApi.create(editedItem.value as Omit<PC, 'id' | 'createdAt' | 'updatedAt'>)
+      const { id, createdAt, updatedAt, ...newPc } = editedItem.value
+      await pcApi.create(newPc as Omit<PC, 'id'>)
       await fetchData()
     }
     closeDialog()
@@ -227,19 +364,81 @@ async function deleteItem() {
 async function fetchData() {
   try {
     loading.value = true
-    const [pcsResponse, osTypesResponse, usersResponse] = await Promise.all([
+    const [pcsResponse, osTypesResponse, usersResponse, locationsResponse] = await Promise.all([
       pcApi.getAll(),
       osTypeApi.getAll(),
-      userApi.getAll()
+      userApi.getAll(),
+      locationApi.getAll()
     ])
     pcs.value = pcsResponse.data
     osTypes.value = osTypesResponse.data
     users.value = usersResponse.data
+    locations.value = locationsResponse.data.filter(location => !location.isDeleted)
   } catch (error) {
     console.error('Error fetching data:', error)
     showError('データの取得に失敗しました。')
   } finally {
     loading.value = false
+  }
+}
+
+async function fetchLocationHistories(pcId: number) {
+  try {
+    locationHistoryLoading.value = true
+    const response = await pcLocationHistoryApi.getByPcId(pcId)
+    locationHistories.value = response.data
+  } catch (error) {
+    console.error('Error fetching location histories:', error)
+    showError('設置場所履歴の取得に失敗しました。')
+  } finally {
+    locationHistoryLoading.value = false
+  }
+}
+
+function openLocationHistoryDialog(item: PC) {
+  editedItem.value = { ...item }
+  fetchLocationHistories(item.id!)
+  locationHistoryDialog.value = true
+}
+
+function openLocationHistoryEditDialog(item?: PCLocationHistory) {
+  editedLocationHistory.value = item ? { ...item } : { ...defaultLocationHistory.value, pcId: editedItem.value.id }
+  locationHistoryEditDialog.value = true
+}
+
+function closeLocationHistoryEditDialog() {
+  locationHistoryEditDialog.value = false
+  editedLocationHistory.value = { ...defaultLocationHistory.value }
+  locationHistoryForm.value?.reset()
+}
+
+async function saveLocationHistory() {
+  const { valid } = await locationHistoryForm.value?.validate()
+  if (!valid) return
+
+  try {
+    if (editedLocationHistory.value.id) {
+      await pcLocationHistoryApi.update(editedLocationHistory.value.id, editedLocationHistory.value)
+    } else {
+      await pcLocationHistoryApi.create(editedLocationHistory.value as Omit<PCLocationHistory, 'id'>)
+    }
+    await fetchLocationHistories(editedItem.value.id!)
+    closeLocationHistoryEditDialog()
+  } catch (error) {
+    console.error('Error saving location history:', error)
+    showError('設置場所履歴の保存に失敗しました。')
+  }
+}
+
+async function deleteLocationHistory(item: PCLocationHistory) {
+  if (!confirm('この設置場所履歴を削除してもよろしいですか？')) return
+
+  try {
+    await pcLocationHistoryApi.delete(item.id!)
+    await fetchLocationHistories(editedItem.value.id!)
+  } catch (error) {
+    console.error('Error deleting location history:', error)
+    showError('設置場所履歴の削除に失敗しました。')
   }
 }
 

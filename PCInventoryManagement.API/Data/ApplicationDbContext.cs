@@ -10,44 +10,30 @@ namespace PCInventoryManagement.API.Data
         {
         }
 
-        public DbSet<PC> PCs { get; set; } = null!;
-        public DbSet<OSType> OSTypes { get; set; } = null!;
-        public DbSet<User> Users { get; set; } = null!;
-        public DbSet<PCLocationHistory> PCLocationHistories { get; set; } = null!;
+        public DbSet<PC> PCs { get; set; }
+        public DbSet<OSType> OSTypes { get; set; }
+        public DbSet<User> Users { get; set; }
+        public DbSet<Location> Locations { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
-
             modelBuilder.Entity<PC>()
                 .HasOne(p => p.OSType)
                 .WithMany()
                 .HasForeignKey(p => p.OSTypeId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<PC>()
-                .HasOne(p => p.CurrentUser)
-                .WithMany()
-                .HasForeignKey(p => p.CurrentUserId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .HasOne(p => p.User)
+                .WithMany(u => u.PCs)
+                .HasForeignKey(p => p.UserId)
+                .OnDelete(DeleteBehavior.SetNull);
 
-            modelBuilder.Entity<PCLocationHistory>()
-                .HasOne(h => h.PC)
-                .WithMany()
-                .HasForeignKey(h => h.PCId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<PCLocationHistory>()
-                .HasOne(h => h.FromUser)
-                .WithMany()
-                .HasForeignKey(h => h.FromUserId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<PCLocationHistory>()
-                .HasOne(h => h.ToUser)
-                .WithMany()
-                .HasForeignKey(h => h.ToUserId)
-                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<User>()
+                .HasOne(u => u.Location)
+                .WithMany(l => l.Users)
+                .HasForeignKey(u => u.LocationId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 } 

@@ -8,7 +8,7 @@ namespace PCInventoryManagement.API.Models
         public int Id { get; set; }
 
         [Required]
-        [StringLength(50)]
+        [StringLength(10)]
         public string ManagementNumber { get; set; } = string.Empty;
 
         [Required]
@@ -18,11 +18,11 @@ namespace PCInventoryManagement.API.Models
         public int OSTypeId { get; set; }
         public virtual OSType? OSType { get; set; }
 
-        public int? CurrentUserId { get; set; }
-        public virtual User? CurrentUser { get; set; }
+        public int? UserId { get; set; }
+        public virtual User? User { get; set; }
 
         public bool IsDeleted { get; set; }
         public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
     }
 } 

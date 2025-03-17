@@ -1,0 +1,42 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "User",
+    "description": "ユーザー情報を表すスキーマ",
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "integer",
+            "description": "ユーザーID"
+        },
+        "name": {
+            "type": "string",
+            "description": "ユーザー名",
+            "maxLength": 50
+        },
+        "adAccount": {
+            "type": "string",
+            "description": "ADアカウント名",
+            "maxLength": 50
+        },
+        "locationId": {
+            "type": "integer",
+            "description": "所属拠点のID"
+        },
+        "location": {
+            "description": "所属拠点の情報",
+            "$ref": "location.schema.json"
+        },
+        "pcs": {
+            "type": "array",
+            "description": "ユーザーに割り当てられたPC一覧",
+            "items": {
+                "$ref": "pc.schema.json"
+            }
+        },
+        "isDeleted": {
+            "type": "boolean",
+            "description": "削除フラグ"
+        }
+    },
+    "required": ["name", "adAccount", "locationId"]
+} 

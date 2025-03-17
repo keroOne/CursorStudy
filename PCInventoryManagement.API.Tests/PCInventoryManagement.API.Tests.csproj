@@ -27,6 +27,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\PCInventoryManagement.API\PCInventoryManagement.API.csproj" />
+    <ProjectReference Include="..\PCInventoryManagement.TestDataManager\PCInventoryManagement.TestDataManager.csproj" />
   </ItemGroup>
 
 </Project>

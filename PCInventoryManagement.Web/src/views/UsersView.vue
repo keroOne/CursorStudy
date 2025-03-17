@@ -75,6 +75,17 @@
                   ></v-text-field>
                 </v-col>
                 <v-col cols="12">
+                  <v-select
+                    v-model="editedItem.locationId"
+                    :items="locations"
+                    item-title="name"
+                    item-value="id"
+                    label="所属拠点"
+                    required
+                    :rules="[v => !!v || '所属拠点は必須です']"
+                  ></v-select>
+                </v-col>
+                <v-col cols="12">
                   <v-switch
                     v-model="editedItem.isActive"
                     label="有効"
@@ -126,18 +137,19 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import type { User } from '../types'
-import { userApi } from '../api'
+import type { User, Location } from '@/types'
+import { userApi, locationApi } from '@/api'
 import ErrorSnackbar from '../components/ErrorSnackbar.vue'
 import { required, maxLength, minLength, displayName } from '../validation/rules'
 
-const loading = ref(false)
+const loading = ref(true)
 const dialog = ref(false)
 const deleteDialog = ref(false)
 const errorDialog = ref(false)
 const errorMessage = ref('')
 const form = ref()
 const users = ref<User[]>([])
+const locations = ref<Location[]>([])
 const editedIndex = ref(-1)
 const editedItem = ref<Partial<User>>({})
 const defaultItem = ref<Partial<User>>({
@@ -145,13 +157,15 @@ const defaultItem = ref<Partial<User>>({
   adAccount: '',
   displayName: '',
   isActive: true,
-  isDeleted: false
+  isDeleted: false,
+  locationId: 0
 })
 
 const headers = [
   { title: 'ID', key: 'id' },
   { title: 'ADアカウント', key: 'adAccount' },
   { title: '表示名', key: 'displayName' },
+  { title: '所属拠点', key: 'location.name' },
   { title: 'ステータス', key: 'isActive' },
   { title: '操作', key: 'actions', sortable: false }
 ]
@@ -222,7 +236,9 @@ async function fetchData() {
   try {
     loading.value = true
     const response = await userApi.getAll()
-    users.value = response.data
+    users.value = response.data.filter(user => !user.isDeleted)
+    const locationResponse = await locationApi.getAll()
+    locations.value = locationResponse.data.filter(location => !location.isDeleted)
   } catch (error) {
     console.error('Error fetching users:', error)
     showError('データの取得に失敗しました。')

@@ -11,6 +11,12 @@ import { RouterView } from 'vue-router'
         </router-link>
       </v-app-bar-title>
       <v-spacer></v-spacer>
+      <v-btn to="/locations" class="mr-2">
+        拠点管理
+      </v-btn>
+      <v-btn to="/users" class="mr-2">
+        ユーザー管理
+      </v-btn>
       <v-btn to="/" icon>
         <v-icon>mdi-home</v-icon>
       </v-btn>

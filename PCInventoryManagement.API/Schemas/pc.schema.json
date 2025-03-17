@@ -1,0 +1,80 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PC",
+  "description": "PCを表すスキーマ",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "integer",
+      "description": "PCの一意識別子"
+    },
+    "managementNumber": {
+      "type": "string",
+      "description": "PC管理番号",
+      "maxLength": 20
+    },
+    "modelName": {
+      "type": "string",
+      "description": "PCのモデル名",
+      "maxLength": 50
+    },
+    "osTypeId": {
+      "type": "integer",
+      "description": "OSの種類のID"
+    },
+    "currentUserId": {
+      "type": ["integer", "null"],
+      "description": "現在の使用者のID"
+    },
+    "isDeleted": {
+      "type": "boolean",
+      "description": "削除フラグ",
+      "default": false
+    },
+    "osType": {
+      "$ref": "ostype.schema.json",
+      "description": "PCのOS情報"
+    },
+    "currentUser": {
+      "$ref": "user.schema.json",
+      "description": "PCの現在の使用者情報"
+    },
+    "pcLocationHistories": {
+      "type": "array",
+      "description": "PCの設置場所履歴",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "履歴の一意識別子"
+          },
+          "pcId": {
+            "type": "integer",
+            "description": "PC ID"
+          },
+          "locationId": {
+            "type": "integer",
+            "description": "設置場所ID"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "設置開始日時"
+          },
+          "endDate": {
+            "type": ["string", "null"],
+            "format": "date-time",
+            "description": "設置終了日時"
+          },
+          "location": {
+            "$ref": "location.schema.json",
+            "description": "設置場所情報"
+          }
+        },
+        "required": ["pcId", "locationId", "startDate"]
+      }
+    }
+  },
+  "required": ["managementNumber", "modelName", "osTypeId"]
+} 

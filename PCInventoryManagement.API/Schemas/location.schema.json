@@ -1,0 +1,35 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Location",
+    "description": "拠点情報を表すスキーマ",
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "integer",
+            "description": "拠点のID"
+        },
+        "code": {
+            "type": "string",
+            "description": "拠点コード",
+            "pattern": "^[A-Z0-9]{10}$",
+            "maxLength": 10
+        },
+        "name": {
+            "type": "string",
+            "description": "拠点名",
+            "maxLength": 20
+        },
+        "isDeleted": {
+            "type": "boolean",
+            "description": "削除フラグ"
+        },
+        "users": {
+            "type": "array",
+            "description": "拠点に所属するユーザー一覧",
+            "items": {
+                "$ref": "user.schema.json"
+            }
+        }
+    },
+    "required": ["code", "name"]
+} 

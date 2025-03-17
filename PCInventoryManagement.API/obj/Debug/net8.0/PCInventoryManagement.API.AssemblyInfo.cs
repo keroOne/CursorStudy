@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("PCInventoryManagement.API")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+541f5c30da4c8baf2a81c224787fb08636c09439")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+af8c9dcff87c037486da6adcae7a3b01b84899b9")]
 [assembly: System.Reflection.AssemblyProductAttribute("PCInventoryManagement.API")]
 [assembly: System.Reflection.AssemblyTitleAttribute("PCInventoryManagement.API")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

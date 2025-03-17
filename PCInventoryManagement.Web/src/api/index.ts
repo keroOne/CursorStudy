@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { PC, OSType, User } from '../types'
+import type { PC, OSType, User, Location, PCLocationHistory } from '../types'
 
 const api = axios.create({
   baseURL: 'http://localhost:5190/api'
@@ -9,7 +9,7 @@ const api = axios.create({
 export const pcApi = {
   getAll: () => api.get<PC[]>('/PCs'),
   getById: (id: number) => api.get<PC>(`/PCs/${id}`),
-  create: (pc: Omit<PC, 'id' | 'createdAt' | 'updatedAt'>) => api.post<PC>('/PCs', pc),
+  create: (pc: Omit<PC, 'id'>) => api.post<PC>('/PCs', pc),
   update: (id: number, pc: Partial<PC>) => api.put(`/PCs/${id}`, pc),
   delete: (id: number) => api.delete(`/PCs/${id}`)
 }
@@ -30,4 +30,24 @@ export const userApi = {
   create: (user: Omit<User, 'id'>) => api.post<User>('/Users', user),
   update: (id: number, user: Partial<User>) => api.put(`/Users/${id}`, user),
   delete: (id: number) => api.delete(`/Users/${id}`)
+}
+
+// 拠点関連のAPI
+export const locationApi = {
+  getAll: () => api.get<Location[]>('/Locations'),
+  getById: (id: number) => api.get<Location>(`/Locations/${id}`),
+  create: (location: Omit<Location, 'id'>) => api.post<Location>('/Locations', location),
+  update: (id: number, location: Partial<Location>) => api.put(`/Locations/${id}`, location),
+  delete: (id: number) => api.delete(`/Locations/${id}`)
+}
+
+// PC設置場所履歴関連のAPI
+export const pcLocationHistoryApi = {
+  getByPcId: (pcId: number) => api.get<PCLocationHistory[]>(`/PCs/${pcId}/LocationHistories`),
+  create: (pcId: number, history: Omit<PCLocationHistory, 'id'>) => 
+    api.post<PCLocationHistory>(`/PCs/${pcId}/LocationHistories`, history),
+  update: (pcId: number, historyId: number, history: Partial<PCLocationHistory>) =>
+    api.put(`/PCs/${pcId}/LocationHistories/${historyId}`, history),
+  delete: (pcId: number, historyId: number) =>
+    api.delete(`/PCs/${pcId}/LocationHistories/${historyId}`)
 } 

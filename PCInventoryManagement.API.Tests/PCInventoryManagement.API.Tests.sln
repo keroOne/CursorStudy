@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PCInventoryManagement.API.Tests", "PCInventoryManagement.API.Tests.csproj", "{DB0FCE61-AEA5-7A3B-EDAB-2241833E117A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DB0FCE61-AEA5-7A3B-EDAB-2241833E117A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DB0FCE61-AEA5-7A3B-EDAB-2241833E117A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DB0FCE61-AEA5-7A3B-EDAB-2241833E117A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DB0FCE61-AEA5-7A3B-EDAB-2241833E117A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {514FB4A9-8947-4CE2-8841-33C76B54B66C}
+	EndGlobalSection
+EndGlobal

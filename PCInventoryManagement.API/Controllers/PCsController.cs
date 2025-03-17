@@ -1,3 +1,6 @@
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PCInventoryManagement.API.Data;
@@ -5,8 +8,8 @@ using PCInventoryManagement.API.Models;
 
 namespace PCInventoryManagement.API.Controllers
 {
-    [ApiController]
     [Route("api/[controller]")]
+    [ApiController]
     public class PCsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -16,24 +19,24 @@ namespace PCInventoryManagement.API.Controllers
             _context = context;
         }
 
-        // GET: api/PCs
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<PC>>> GetPCs()
+        public async Task<IActionResult> GetPCs()
         {
-            return await _context.PCs
+            var pcs = await _context.PCs
                 .Include(p => p.OSType)
-                .Include(p => p.CurrentUser)
+                .Include(p => p.User)
                 .Where(p => !p.IsDeleted)
                 .ToListAsync();
+
+            return Ok(pcs);
         }
 
-        // GET: api/PCs/5
         [HttpGet("{id}")]
         public async Task<ActionResult<PC>> GetPC(int id)
         {
             var pc = await _context.PCs
                 .Include(p => p.OSType)
-                .Include(p => p.CurrentUser)
+                .Include(p => p.User)
                 .FirstOrDefaultAsync(p => p.Id == id && !p.IsDeleted);
 
             if (pc == null)
@@ -44,29 +47,31 @@ namespace PCInventoryManagement.API.Controllers
             return pc;
         }
 
-        // POST: api/PCs
         [HttpPost]
         public async Task<ActionResult<PC>> CreatePC(PC pc)
         {
+            if (!await _context.OSTypes.AnyAsync(o => o.Id == pc.OSTypeId))
+            {
+                return BadRequest("Invalid OSTypeId");
+            }
+
+            if (pc.UserId.HasValue && !await _context.Users.AnyAsync(u => u.Id == pc.UserId))
+            {
+                return BadRequest("Invalid UserId");
+            }
+
+            if (await _context.PCs.AnyAsync(p => p.ManagementNumber == pc.ManagementNumber && !p.IsDeleted))
+            {
+                return BadRequest("Management number already exists");
+            }
+
             pc.CreatedAt = DateTime.UtcNow;
-            pc.UpdatedAt = DateTime.UtcNow;
             _context.PCs.Add(pc);
             await _context.SaveChangesAsync();
 
-            var createdPC = await _context.PCs
-                .Include(p => p.OSType)
-                .Include(p => p.CurrentUser)
-                .FirstOrDefaultAsync(p => p.Id == pc.Id);
-
-            if (createdPC == null)
-            {
-                return NotFound();
-            }
-
-            return createdPC;
+            return CreatedAtAction(nameof(GetPC), new { id = pc.Id }, pc);
         }
 
-        // PUT: api/PCs/5
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdatePC(int id, PC pc)
         {
@@ -81,10 +86,24 @@ namespace PCInventoryManagement.API.Controllers
                 return NotFound();
             }
 
+            if (!await _context.OSTypes.AnyAsync(o => o.Id == pc.OSTypeId))
+            {
+                return BadRequest("Invalid OSTypeId");
+            }
+
+            if (pc.UserId.HasValue && !await _context.Users.AnyAsync(u => u.Id == pc.UserId))
+            {
+                return BadRequest("Invalid UserId");
+            }
+
+            if (await _context.PCs.AnyAsync(p => p.ManagementNumber == pc.ManagementNumber && p.Id != id && !p.IsDeleted))
+            {
+                return BadRequest("Management number already exists");
+            }
+
             existingPC.ManagementNumber = pc.ManagementNumber;
-            existingPC.ModelName = pc.ModelName;
             existingPC.OSTypeId = pc.OSTypeId;
-            existingPC.CurrentUserId = pc.CurrentUserId;
+            existingPC.UserId = pc.UserId;
             existingPC.UpdatedAt = DateTime.UtcNow;
 
             try
@@ -93,25 +112,21 @@ namespace PCInventoryManagement.API.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!PCExists(id))
+                if (!await _context.PCs.AnyAsync(p => p.Id == id))
                 {
                     return NotFound();
                 }
-                else
-                {
-                    throw;
-                }
+                throw;
             }
 
             return NoContent();
         }
 
-        // DELETE: api/PCs/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePC(int id)
         {
             var pc = await _context.PCs.FindAsync(id);
-            if (pc == null || pc.IsDeleted)
+            if (pc == null)
             {
                 return NotFound();
             }
@@ -121,11 +136,6 @@ namespace PCInventoryManagement.API.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
-        }
-
-        private bool PCExists(int id)
-        {
-            return _context.PCs.Any(e => e.Id == id && !e.IsDeleted);
         }
     }
 } 

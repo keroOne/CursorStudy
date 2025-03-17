@@ -4560,11 +4560,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\KERO\\source\\repos\\Cursor01\\PCInventoryManagement.API\\PCInventoryManagement.API.csproj",
+      "projectUniqueName": "C:\\Users\\KERO\\source\\repos\\CursorStudy\\PCInventoryManagement.API\\PCInventoryManagement.API.csproj",
       "projectName": "PCInventoryManagement.API",
-      "projectPath": "C:\\Users\\KERO\\source\\repos\\Cursor01\\PCInventoryManagement.API\\PCInventoryManagement.API.csproj",
+      "projectPath": "C:\\Users\\KERO\\source\\repos\\CursorStudy\\PCInventoryManagement.API\\PCInventoryManagement.API.csproj",
       "packagesPath": "C:\\Users\\KERO\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\KERO\\source\\repos\\Cursor01\\PCInventoryManagement.API\\obj\\",
+      "outputPath": "C:\\Users\\KERO\\source\\repos\\CursorStudy\\PCInventoryManagement.API\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages",
